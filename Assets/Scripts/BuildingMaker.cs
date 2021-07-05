@@ -19,18 +19,44 @@ class BuildingMaker : InfrastructureBehaviour
         foreach (var way in map.ways.FindAll( (w) => { return w.IsBuilding && w.NodeIDs.Count > 1;  }))
         {
             GameObject go = new GameObject();
+            GameObject roof = new GameObject();
+
+            go.tag = "Building";
+            roof.tag = "Roof";
             Vector3 localOrigin = GetCentre(way);
             go.transform.position = localOrigin - map.bounds.Centre;
+            roof.transform.position = localOrigin - map.bounds.Centre;
 
             MeshFilter mf = go.AddComponent<MeshFilter>();
+            MeshFilter mf1 = roof.AddComponent<MeshFilter>();
             MeshRenderer mr = go.AddComponent<MeshRenderer>();
+            MeshRenderer mr1 = roof.AddComponent<MeshRenderer>();
 
             mr.material = building;
+            mr1.material = building;
 
             List<Vector3> vectors = new List<Vector3>();
+            List<Vector3> rvectors = new List<Vector3>();
             List<Vector3> normals = new List<Vector3>();
             List<Vector2> uvs = new List<Vector2>();
             List<int> indicies = new List<int>();
+
+            Vector3[] roofVectors;
+            int[] roofTriangles;
+            Vector2[] roofUV;
+
+            int verticesCount = way.NodeIDs.Count;
+
+            for (int i = 0; i < verticesCount; i++)
+            {
+                OsmNode vertex = map.nodes[way.NodeIDs[i]];
+
+                Vector3 low_vertex3 = new Vector3(vertex.X, way.Height, vertex.Y) - localOrigin;
+
+                rvectors.Add(low_vertex3);
+            }
+
+            Triangulation.GetResult(rvectors, false, Vector3.up, out roofVectors, out roofTriangles, out roofUV);
 
             for (int i = 1; i < way.NodeIDs.Count; i++)
             {
@@ -92,7 +118,13 @@ class BuildingMaker : InfrastructureBehaviour
             mf.mesh.triangles = indicies.ToArray();
             mf.mesh.uv = uvs.ToArray();
 
-            yield return null;
+            mf1.mesh.vertices = roofVectors;
+            mf1.mesh.RecalculateNormals();
+            mf1.mesh.RecalculateBounds();
+            mf1.mesh.triangles = roofTriangles;
+            mf1.mesh.uv = roofUV;
+
+            go.AddComponent<MeshCollider>();
         }
     }
 
