@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 
@@ -8,6 +9,7 @@ class BuildingMaker : InfrastructureBehaviour
 
 
     public Material building;
+    public Material grass;
 
     IEnumerator Start()
     {
@@ -15,6 +17,23 @@ class BuildingMaker : InfrastructureBehaviour
         {
             yield return null;
         }
+
+        /*TerrainData _terraindata = new TerrainData();
+        _terraindata.size = new Vector3(200, 0, 200);
+        Vector3 position = new Vector3(-2000, (float)-0.01, -2000); //the ingame position you want your terrain at
+        
+        for (int i = 0; i < 20; i++)
+        {
+            for (int j = 0; j < 20; j++)
+            {
+                
+                GameObject terrain = new GameObject();
+                terrain = Terrain.CreateTerrainGameObject(_terraindata);
+                terrain.transform.position = position + new Vector3(i * 200, 0, j * 200);
+        
+            }
+        }*/
+
 
         foreach (var way in map.ways.FindAll( (w) => { return w.IsBuilding && w.NodeIDs.Count > 1;  }))
         {
